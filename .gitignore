@@ -1,0 +1,30 @@
+# ── Build output ──────────────────────────────────────────────
+target/
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ── Maven wrapper auto-downloaded distribution ────────────────
+# mvnw / mvnw.cmd download Maven into here on first build.
+.mvn/wrapper/apache-maven-*/
+.mvn/wrapper/*.zip
+
+# ── IDE / editor ──────────────────────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+*.swp
+*~
+
+# ── OS cruft ──────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs / temp ───────────────────────────────────────────────
+*.log
+hs_err_pid*

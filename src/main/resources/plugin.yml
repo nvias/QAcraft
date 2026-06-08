@@ -1,0 +1,21 @@
+name: QAcraft
+version: '1.0.0'
+main: com.qacraft.QAcraftPlugin
+api-version: '1.21'
+description: BB84 Quantum Key Distribution simulation in Minecraft
+authors: [NVIAS, QAcraft]
+website: https://bridgetostem.com
+
+commands:
+  qacraft:
+    description: QAcraft commands
+    usage: /<command> <subcommand>
+    aliases: [q, qac]
+
+permissions:
+  qacraft.use:
+    description: Use quantum tools
+    default: true
+  qacraft.admin:
+    description: Admin commands
+    default: op

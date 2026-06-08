@@ -1,0 +1,96 @@
+# =============================================================================
+# QAcraft tutorial steps
+#
+# This file ships with the plugin and is copied to plugins/QAcraft/tutorial.yml
+# on first run. Edit the copy (not the jar) to customise step coordinates for
+# your demo world.
+#
+# Each step:
+#   id:        short slug
+#   title:     shown in chat header and floating display
+#   subtitle:  small line under the on-screen title
+#   chat:      multi-line description sent in chat and shown on the floating sign
+#   teleport:  where the player teleports when entering the step
+#   display:   (optional) where the floating TextDisplay sign hovers
+# =============================================================================
+
+steps:
+  - id: lobby
+    title: "Welcome to Quantum Academy"
+    subtitle: "QAcraft workshop"
+    chat: "Welcome! This world demonstrates three quantum protocols: BB84, Grover, and E91. Use /qacraft tutorial next to continue, or explore freely."
+    teleport: {world: world, x: 0.5,  y: 65, z: 0.5,  yaw: 0,    pitch: 0}
+    display:  {world: world, x: 0.5,  y: 68, z: 0.5}
+
+  - id: tools
+    title: "Get your tools"
+    subtitle: "/qacraft tools all"
+    chat: "Type /qacraft tools all to receive every protocol's tools. The Quantum Eraser (Brush) always lives in hotbar slot 9."
+    teleport: {world: world, x: 0.5,  y: 65, z: 0.5,  yaw: 0,    pitch: 0}
+
+  # ---------------- BB84 ----------------
+  - id: bb84-sender
+    title: "BB84 — Place the transmitter"
+    subtitle: "Right-click Nether Star"
+    chat: "Stand where you want the sender to be and right-click the Nether Star. Two glowing particle outlines mark where the double chest goes."
+    teleport: {world: world, x: 10.5, y: 65, z: 0.5,  yaw: 90,   pitch: 0}
+    display:  {world: world, x: 10.5, y: 68, z: 0.5}
+
+  - id: bb84-fill
+    title: "BB84 — Fill the chest"
+    subtitle: "/qacraft sender fill"
+    chat: "Place a double chest at the highlighted spots, then run /qacraft sender fill. 27 random basis filters appear in rows 1, 3, and 5."
+    teleport: {world: world, x: 10.5, y: 65, z: 0.5,  yaw: 90,   pitch: 0}
+
+  - id: bb84-gate
+    title: "BB84 — Build the gate"
+    subtitle: "Right-click Breeze Rod"
+    chat: "Walk to Bob's side and right-click the Breeze Rod to place a measurement gate. Two more outlines show where the receiving double chest goes — fill it with the basis filters Bob will use."
+    teleport: {world: world, x: 25.5, y: 65, z: 0.5,  yaw: 90,   pitch: 0}
+    display:  {world: world, x: 25.5, y: 68, z: 0.5}
+
+  - id: bb84-start
+    title: "BB84 — Transmit"
+    subtitle: "/qacraft sender start"
+    chat: "Run /qacraft sender start. One photon flies per second; the gate writes results into Bob's chest as coloured glass. Stop early with /qacraft sender stop."
+    teleport: {world: world, x: 10.5, y: 65, z: 0.5,  yaw: 90,   pitch: 0}
+
+  # ---------------- Grover ----------------
+  - id: grover-setup
+    title: "Grover — Mark positions"
+    subtitle: "/qacraft grover setup"
+    chat: "Walk to the Grover platform and run /qacraft grover setup. 8 numbered markers appear in a ring around you."
+    teleport: {world: world, x: 0.5,  y: 65, z: 30.5, yaw: 180,  pitch: 0}
+    display:  {world: world, x: 0.5,  y: 68, z: 30.5}
+
+  - id: grover-fill
+    title: "Grover — Place chests + wool"
+    subtitle: "placechests + fillwool"
+    chat: "Run /qacraft grover placechests then /qacraft grover fillwool. Each chest gets a random colour of wool. Pick one colour as your search target."
+    teleport: {world: world, x: 0.5,  y: 65, z: 30.5, yaw: 180,  pitch: 0}
+
+  - id: grover-iterate
+    title: "Grover — Iterate"
+    subtitle: "Throw Wind Charge"
+    chat: "Hold the Spyglass in your main hand and your target wool in the offhand. Throw a Wind Charge to run one Grover iteration — probability columns appear. Two iterations gives ≈97.7% on the correct chest."
+    teleport: {world: world, x: 0.5,  y: 65, z: 30.5, yaw: 180,  pitch: 0}
+
+  # ---------------- E91 ----------------
+  - id: e91-source
+    title: "E91 — Place the EPR source"
+    subtitle: "Right-click Amethyst Shard"
+    chat: "Stand at the source platform and right-click the Amethyst Shard. This is where entangled photon pairs will be generated."
+    teleport: {world: world, x: 0.5,  y: 65, z: -30.5, yaw: 0,   pitch: 0}
+    display:  {world: world, x: 0.5,  y: 68, z: -30.5}
+
+  - id: e91-pads
+    title: "E91 — Alice and Bob"
+    subtitle: "Diamond/Gold Axe right-click"
+    chat: "Walk to Alice's side and right-click the Diamond Axe to place landing pads (repeat for more). Do the same at Bob's side with the Gold Axe. Left-click sets the zone marker fallback."
+    teleport: {world: world, x: -10.5, y: 65, z: -30.5, yaw: 90, pitch: 0}
+
+  - id: e91-measure
+    title: "E91 — Generate and measure"
+    subtitle: "generate / measure / key"
+    chat: "Run /qacraft e91 generate (or start for auto). Walk near an arrived photon holding Compass, Recovery Compass, or Clock to measure it. Then /qacraft e91 key reveals the shared secret bits."
+    teleport: {world: world, x: 0.5,  y: 65, z: -30.5, yaw: 0,   pitch: 0}
