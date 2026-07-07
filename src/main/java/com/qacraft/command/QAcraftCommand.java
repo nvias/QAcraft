@@ -124,7 +124,6 @@ public class QAcraftCommand implements CommandExecutor, TabCompleter {
         plugin.getGroverManager().clear();
         plugin.getE91Manager().clear();
         plugin.getPlasmaManager().clearAll();
-        plugin.getTutorialManager().clearDisplays();
         Bukkit.broadcast(Component.text("Everything cleared.", NamedTextColor.GRAY));
     }
 
@@ -162,35 +161,13 @@ public class QAcraftCommand implements CommandExecutor, TabCompleter {
 
     private void handleTutorial(Player p, String[] args) {
         if (args.length < 2) {
-            p.sendMessage(Component.text("/qacraft tutorial <start|next|back|goto|stop|spawn|clear|reload>", NamedTextColor.YELLOW));
+            p.sendMessage(Component.text("/qacraft tutorial <start|stop>", NamedTextColor.YELLOW));
             return;
         }
         switch (args[1].toLowerCase()) {
-            case "start"  -> plugin.getInteractiveTutorial().start(p);
-            case "stop"   -> plugin.getInteractiveTutorial().stop(p);
-            case "next"   -> plugin.getTutorialManager().next(p);
-            case "back"   -> plugin.getTutorialManager().back(p);
-            case "spawn"  -> plugin.getTutorialManager().spawnDisplays(p);
-            case "clear"  -> {
-                plugin.getTutorialManager().clearDisplays();
-                p.sendMessage(Component.text("Tutorial displays cleared.", NamedTextColor.GRAY));
-            }
-            case "reload" -> {
-                plugin.getTutorialManager().loadSteps();
-                p.sendMessage(Component.text("Tutorial reloaded — "
-                    + plugin.getTutorialManager().stepCount() + " steps.", NamedTextColor.GREEN));
-            }
-            case "goto"   -> {
-                if (args.length < 3) {
-                    p.sendMessage(Component.text("/qacraft tutorial goto <step>", NamedTextColor.YELLOW));
-                    return;
-                }
-                try { plugin.getTutorialManager().gotoStep(p, Integer.parseInt(args[2])); }
-                catch (NumberFormatException ex) {
-                    p.sendMessage(Component.text("Step must be a number.", NamedTextColor.RED));
-                }
-            }
-            default -> p.sendMessage(Component.text("/qacraft tutorial <start|next|back|goto|stop|spawn|clear|reload>", NamedTextColor.YELLOW));
+            case "start" -> plugin.getInteractiveTutorial().start(p);
+            case "stop"  -> plugin.getInteractiveTutorial().stop(p);
+            default -> p.sendMessage(Component.text("/qacraft tutorial <start|stop>", NamedTextColor.YELLOW));
         }
     }
 
@@ -276,7 +253,7 @@ public class QAcraftCommand implements CommandExecutor, TabCompleter {
         p.sendMessage(Component.text("/qacraft send rect|diag 0|1", NamedTextColor.YELLOW).append(Component.text(" — manual send", NamedTextColor.GRAY)));
         p.sendMessage(Component.text("/qacraft photon clear|info", NamedTextColor.YELLOW).append(Component.text(" — photon utils", NamedTextColor.GRAY)));
         p.sendMessage(Component.text("/qacraft clear", NamedTextColor.YELLOW).append(Component.text(" — clear everything", NamedTextColor.GRAY)));
-        p.sendMessage(Component.text("  Nether Star=sender  Breeze Rod=gate", NamedTextColor.DARK_GRAY));
+        p.sendMessage(Component.text("  Nether Star=sender  Eye of Ender=gate", NamedTextColor.DARK_GRAY));
         p.sendMessage(Component.text(""));
         p.sendMessage(Component.text("=== GROVER'S SEARCH ===", NamedTextColor.GOLD));
         p.sendMessage(Component.text("/qacraft grover setup [id]", NamedTextColor.YELLOW).append(Component.text(" — mark 8 positions (new instance)", NamedTextColor.GRAY)));
@@ -299,8 +276,7 @@ public class QAcraftCommand implements CommandExecutor, TabCompleter {
         p.sendMessage(Component.text("/qacraft plasma", NamedTextColor.YELLOW).append(Component.text(" — get plasma tools (Heart=summon, Echo Shard=remove)", NamedTextColor.GRAY)));
         p.sendMessage(Component.text("/qacraft plasma clear", NamedTextColor.YELLOW).append(Component.text(" — remove all plasmas", NamedTextColor.GRAY)));
         p.sendMessage(Component.text("/qacraft world build|clear", NamedTextColor.YELLOW).append(Component.text(" — build/remove the tutorial hall", NamedTextColor.GRAY)));
-        p.sendMessage(Component.text("/qacraft tutorial start|next|back|stop", NamedTextColor.YELLOW).append(Component.text(" — guided walkthrough", NamedTextColor.GRAY)));
-        p.sendMessage(Component.text("/qacraft tutorial spawn|clear|reload", NamedTextColor.YELLOW).append(Component.text(" — station displays (admin)", NamedTextColor.GRAY)));
+        p.sendMessage(Component.text("/qacraft tutorial start|stop", NamedTextColor.YELLOW).append(Component.text(" — guided walkthrough", NamedTextColor.GRAY)));
     }
 
     @Override
@@ -318,7 +294,7 @@ public class QAcraftCommand implements CommandExecutor, TabCompleter {
                 case "grover" -> filter(args[1], "setup", "placechests", "fillwool", "iterate", "reset", "clear", "list");
                 case "e91"    -> filter(args[1], "source", "alice", "bob", "generate", "start", "stop", "key", "bell", "eve", "clear");
                 case "plasma" -> filter(args[1], "tools", "clear");
-                case "tutorial" -> filter(args[1], "start", "next", "back", "goto", "stop", "spawn", "clear", "reload");
+                case "tutorial" -> filter(args[1], "start", "stop");
                 case "world" -> filter(args[1], "build", "clear");
                 default -> List.of();
             };

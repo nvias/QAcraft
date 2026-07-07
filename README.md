@@ -58,7 +58,7 @@ All commands are under `/qacraft` (aliases: `/q`, `/qac`).
 | Command | Description |
 |---|---|
 | `/qacraft help` | Show the in-game help |
-| `/qacraft tools <bb84\|grover\|e91\|all>` | Give a protocol's tools (clears your inventory first; Eraser in slot 9) |
+| `/qacraft tools <bb84\|grover\|e91\|all>` | Give a protocol's tools (clears your inventory first) |
 | `/qacraft item <name>` | Give one named tool **without** clearing your inventory (tab-complete for names) |
 | `/qacraft clear` | Remove every QAcraft entity in all worlds |
 
@@ -152,7 +152,7 @@ newcomer through every experiment.
 | Diamond Axe | Alice landing pad (R) / zone (L) | E91 |
 | Gold Axe | Bob landing pad (R) / zone (L) | E91 |
 | Heart of the Sea / Echo Shard | Plasma summon / remove | Lobby |
-| Brush (slot 9) | Quantum eraser | all |
+| Brush | Quantum eraser | all |
 
 Filter colours mirror the compasses: **Rectilinear** red, **Diagonal** cyan, **Circular** yellow.
 
@@ -169,10 +169,9 @@ subcommands) to remove them deliberately.
 
 ## Documentation
 
-Step-by-step user guides are in [`docs/`](docs/):
-
-- **`QAcraft-Guide.docx`** — English
-- **`QAcraft-Navod.docx`** — Czech
+The step-by-step user guide is [`docs/QAcraft-Guide.docx`](docs/QAcraft-Guide.docx) —
+chapter by chapter: tools and items with in-game icons, every command, and each
+protocol explained.
 
 ---
 

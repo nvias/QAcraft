@@ -19,7 +19,6 @@ public class QAcraftPlugin extends JavaPlugin {
     private GroverManager groverManager;
     private E91Manager e91Manager;
     private PlasmaManager plasmaManager;
-    private TutorialManager tutorialManager;
     private TutorialWorldBuilder worldBuilder;
     private InteractiveTutorial interactiveTutorial;
 
@@ -39,7 +38,6 @@ public class QAcraftPlugin extends JavaPlugin {
         groverManager      = new GroverManager(this);
         e91Manager         = new E91Manager(this);
         plasmaManager       = new PlasmaManager(this);
-        tutorialManager     = new TutorialManager(this);
         worldBuilder        = new TutorialWorldBuilder(this);
         interactiveTutorial = new InteractiveTutorial(this);
 
@@ -126,7 +124,6 @@ public class QAcraftPlugin extends JavaPlugin {
     public GroverManager      getGroverManager()      { return groverManager; }
     public E91Manager         getE91Manager()         { return e91Manager; }
     public PlasmaManager      getPlasmaManager()      { return plasmaManager; }
-    public TutorialManager    getTutorialManager()    { return tutorialManager; }
     public TutorialWorldBuilder getWorldBuilder()     { return worldBuilder; }
     public InteractiveTutorial getInteractiveTutorial() { return interactiveTutorial; }
 }
