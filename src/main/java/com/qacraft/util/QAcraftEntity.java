@@ -26,7 +26,10 @@ public class QAcraftEntity {
         E91_PARK_A = "q_e91_park_a",   // Alice's flat parking pad (marker + vis + label)
         E91_PARK_B = "q_e91_park_b",   // Bob's flat parking pad (marker + vis + label)
         Q_PLASMA   = "q_plasma",       // Lobby plasma anchor (Marker entity) — rendered by PlasmaManager
-        Q_TUTORIAL_DISPLAY = "q_tutorial_display"; // TextDisplay tutorial station signs
+        Q_TUTORIAL_DISPLAY = "q_tutorial_display", // TextDisplay tutorial station signs
+        Q_WORLD    = "q_world",        // Tutorial-world builder entities (titles, panels, showcases, origin)
+        Q_TUT      = "q_tut",          // Interactive-walkthrough runtime entities (step labels, next-room button)
+        Q_TOOLBTN  = "q_toolbtn";      // In-room "give tools" button marker + its label (num = 1 bb84 / 2 grover / 3 e91)
 
     public static List<Entity> tagged(World w, String tag) {
         List<Entity> r = new ArrayList<>();
@@ -59,6 +62,9 @@ public class QAcraftEntity {
     }
     public static void setNum(Entity e, int v) { setMeta(e, "num", v); }
     public static int num(Entity e) { return getMeta(e, "num", 0); }
+    /** Grover instance id — lets multiple Grover searches coexist. */
+    public static void setGid(Entity e, int v) { setMeta(e, "gid", v); }
+    public static int gid(Entity e) { return getMeta(e, "gid", 0); }
     public static void setBasis(Entity e, int v) { setMeta(e, "basis", v); }
     public static int basis(Entity e) { return getMeta(e, "basis", 0); }
     public static void setBit(Entity e, int v) { setMeta(e, "bit", v); }

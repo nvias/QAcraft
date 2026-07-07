@@ -10,7 +10,7 @@ commands:
   qacraft:
     description: QAcraft commands
     usage: /<command> <subcommand>
-    aliases: [q, qac]
+    aliases: [q, qa, qac]
 
 permissions:
   qacraft.use:

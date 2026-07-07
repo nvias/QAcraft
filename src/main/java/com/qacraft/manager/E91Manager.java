@@ -708,6 +708,12 @@ public class E91Manager implements Listener {
         team.addEntity(e);
     }
 
+    /** True once any photon (Alice or Bob) has been measured. */
+    public boolean anyMeasured() {
+        for (int[] m : measurements.values()) if (m[1] != -1 || m[3] != -1) return true;
+        return false;
+    }
+
     // =========================================================================
     // State persistence — measurements is the only non-trivial structure
     // =========================================================================

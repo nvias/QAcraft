@@ -13,11 +13,15 @@ import org.bukkit.util.Transformation;
 import org.joml.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import java.util.*;
 
 
 public class GateManager {
     private final QAcraftPlugin plugin;
     private final java.util.Random random = new java.util.Random();
+
+    private static final int[] BASIS_SLOTS = {0,1,2,3,4,5,6,7,8, 18,19,20,21,22,23,24,25,26, 36,37,38,39,40,41,42,43,44};
+    private static final String MISSING_TAG = "q_missing_gate";
 
     public GateManager(QAcraftPlugin plugin) { this.plugin = plugin; }
 
@@ -167,14 +171,25 @@ public class GateManager {
                     setFlash(e, 0);
                 }
             }
-            // Chest guide outlines — draw Grover-style particle box; flash green when chest placed
+            // "Missing: filters" display above each gate's double chest
+            Set<Entity> keep = new HashSet<>();
+            for (Entity gate : tagged(w, GATE)) {
+                Block chest = findDoubleChestNear(gate.getLocation());
+                if (chest == null) continue;
+                TextDisplay d = ensureMissing(w, chest, gateMissing(chest));
+                if (d != null) keep.add(d);
+            }
+            for (Entity e : new ArrayList<>(tagged(w, MISSING_TAG))) if (!keep.contains(e)) e.remove();
+
+            // Chest guide outlines — persistent so they return if the chest is removed
             for (Entity guide : tagged(w, GATE_CHEST_GUIDE)) {
                 Location gloc = guide.getLocation();
                 Material bt = gloc.getBlock().getType();
+                boolean filled = guide.getScoreboardTags().contains("q_filled");
                 if (bt == Material.CHEST || bt == Material.TRAPPED_CHEST) {
-                    flashGreen(w, gloc);
-                    guide.remove();
+                    if (!filled) { flashGreen(w, gloc); guide.addScoreboardTag("q_filled"); }
                 } else {
+                    if (filled) guide.getScoreboardTags().remove("q_filled");
                     drawSlotOutline(w, gloc);
                 }
             }
@@ -223,9 +238,46 @@ public class GateManager {
         return null;
     }
 
+    private Block findDoubleChestNear(Location loc) {
+        int[][] offsets = {{1,0,0},{-1,0,0},{0,0,1},{0,0,-1},{2,0,0},{-2,0,0},{0,0,2},{0,0,-2},
+                           {1,0,1},{1,0,-1},{-1,0,1},{-1,0,-1}};
+        for (int[] o : offsets) {
+            Block b = loc.getBlock().getRelative(o[0], o[1], o[2]);
+            if (b.getType() == Material.CHEST && b.getState() instanceof Container c && c.getInventory().getSize() >= 54) return b;
+        }
+        return null;
+    }
+
+    private String gateMissing(Block chest) {
+        Inventory inv = ((Container) chest.getState()).getInventory();
+        for (int s : BASIS_SLOTS) {
+            ItemStack it = inv.getItem(s);
+            if (it == null || (it.getType() != Material.COMPASS && it.getType() != Material.RECOVERY_COMPASS)) return "Missing: filters";
+        }
+        return null;
+    }
+
+    private TextDisplay ensureMissing(World w, Block chest, String missing) {
+        Location at = chest.getLocation().add(0.5, 2.0, 0.5);
+        TextDisplay disp = null;
+        for (Entity e : w.getNearbyEntities(at, 1.0, 2.0, 1.0)) {
+            if (e instanceof TextDisplay td && e.getScoreboardTags().contains(MISSING_TAG)) { disp = td; break; }
+        }
+        if (missing == null) { if (disp != null) disp.remove(); return null; }
+        if (disp == null) {
+            disp = (TextDisplay) w.spawnEntity(at, EntityType.TEXT_DISPLAY);
+            disp.setBillboard(Display.Billboard.CENTER);
+            disp.setShadowed(true);
+            disp.setTransformation(new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.8f), new Quaternionf()));
+            disp.addScoreboardTag(MISSING_TAG);
+        }
+        disp.text(Component.text(missing, NamedTextColor.RED));
+        return disp;
+    }
+
     public void clearAll() {
         for (World w : plugin.getServer().getWorlds()) {
-            killAll(w, GATE); killAll(w, GATE_VIS); killAll(w, GATE_LBL); killAll(w, GATE_CHEST_GUIDE);
+            killAll(w, GATE); killAll(w, GATE_VIS); killAll(w, GATE_LBL); killAll(w, GATE_CHEST_GUIDE); killAll(w, MISSING_TAG);
         }
     }
 }

@@ -41,11 +41,16 @@ public class EraserManager implements Listener {
                 else if (tags.contains(PARKING)) { addGroup(w, toErase, ent, PK_VIS, PK_LBL); }
                 else if (tags.contains(PK_VIS)) { addGroup(w, toErase, ent, PARKING, PK_LBL); }
                 else if (tags.contains(PK_LBL)) { addGroup(w, toErase, ent, PARKING, PK_VIS); }
-                else if (tags.contains(GATE)) { addGroup(w, toErase, ent, GATE_VIS, GATE_LBL); }
-                else if (tags.contains(GATE_VIS)) { addGroup(w, toErase, ent, GATE, GATE_LBL); }
-                else if (tags.contains(GATE_LBL)) { addGroup(w, toErase, ent, GATE, GATE_VIS); }
-                else if (tags.contains(SENDER)) { toErase.add(ent); for (Entity s : tagged(w, SENDER_VIS)) toErase.add(s); }
-                else if (tags.contains(SENDER_VIS)) { toErase.add(ent); for (Entity s : tagged(w, SENDER)) toErase.add(s); }
+                else if (tags.contains(GATE)) { addGroup(w, toErase, ent, GATE_VIS, GATE_LBL); addSameTagGroup(w, toErase, ent, GATE_CHEST_GUIDE); }
+                else if (tags.contains(GATE_VIS)) { addGroup(w, toErase, ent, GATE, GATE_LBL); addSameTagGroup(w, toErase, ent, GATE_CHEST_GUIDE); }
+                else if (tags.contains(GATE_LBL)) { addGroup(w, toErase, ent, GATE, GATE_VIS); addSameTagGroup(w, toErase, ent, GATE_CHEST_GUIDE); }
+                else if (tags.contains(GATE_CHEST_GUIDE)) { addGroup(w, toErase, ent, GATE, GATE_VIS); Entity gl = findLabel(w, GATE_LBL, num(ent)); if (gl != null) toErase.add(gl); addSameTagGroup(w, toErase, ent, GATE_CHEST_GUIDE); }
+                // Sender: erasing any part removes the marker, visual AND the chest-guide spots
+                else if (tags.contains(SENDER) || tags.contains(SENDER_VIS) || tags.contains(SENDER_CHEST)) {
+                    for (Entity s : tagged(w, SENDER))       toErase.add(s);
+                    for (Entity s : tagged(w, SENDER_VIS))   toErase.add(s);
+                    for (Entity s : tagged(w, SENDER_CHEST)) toErase.add(s);
+                }
                 // E91 landmarks — source/alice/bob are single: kill all entities sharing tag
                 else if (tags.contains(E91_SRC))    { tagged(w, E91_SRC).forEach(toErase::add); }
                 else if (tags.contains(E91_ALICE))  { tagged(w, E91_ALICE).forEach(toErase::add); }

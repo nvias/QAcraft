@@ -137,7 +137,9 @@ public class PhotonManager {
             Entity label = findLabel(w, PH_LBL, num(photon));
             if (label != null) label.teleport(photon.getLocation().add(0, 0.55, 0));
 
-            if (photon.getScoreboardTags().contains(SUPERPOSITION) && age(photon) >= 20) {
+            // Small grace period so a photon isn't measured right at the spawn point,
+            // but short enough that gates only a few blocks away still measure it.
+            if (photon.getScoreboardTags().contains(SUPERPOSITION) && age(photon) >= 3) {
                 plugin.getGateManager().checkGate(photon);
             }
 

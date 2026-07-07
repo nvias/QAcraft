@@ -12,10 +12,16 @@ import org.bukkit.util.Transformation;
 import org.joml.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import java.util.*;
 
 public class SenderManager {
     private final QAcraftPlugin plugin;
     private final java.util.Random random = new java.util.Random();
+
+    // Double-chest slot groups (basis rows / bit rows)
+    private static final int[] BASIS_SLOTS = {0,1,2,3,4,5,6,7,8, 18,19,20,21,22,23,24,25,26, 36,37,38,39,40,41,42,43,44};
+    private static final int[] BIT_SLOTS   = {9,10,11,12,13,14,15,16,17, 27,28,29,30,31,32,33,34,35, 45,46,47,48,49,50,51,52,53};
+    private static final String MISSING_TAG = "q_missing_sender";
     private boolean sending = false;
     private int sendSlot = 0;   // logical slot index 0-26 (27 photons, 3 rows of 9)
     private int sendDelay = 0;
@@ -113,11 +119,13 @@ public class SenderManager {
         for (int rs : new int[]{9, 27, 45}) {
             for (int i = 0; i < 9; i++) inv.setItem(rs + i, null);
         }
-        // Fill basis rows (1, 3, 5 → slots 0-8, 18-26, 36-44)
+        // Fill basis rows (1, 3, 5 → slots 0-8, 18-26, 36-44) with the properly
+        // named filter tools (not raw compasses) so they match the tool loadout.
         for (int bs : new int[]{0, 18, 36}) {
             for (int i = 0; i < 9; i++) {
-                Material filter = random.nextBoolean() ? Material.COMPASS : Material.RECOVERY_COMPASS;
-                inv.setItem(bs + i, new ItemStack(filter, 1));
+                inv.setItem(bs + i, random.nextBoolean()
+                    ? ToolManager.rectilinearFilter()
+                    : ToolManager.diagonalFilter());
             }
         }
 
@@ -148,6 +156,8 @@ public class SenderManager {
         Bukkit.broadcast(Component.text("Transmission stopped.", NamedTextColor.GRAY));
     }
 
+    public boolean isSending() { return sending; }
+
     // =========================================================================
     // Tick — two responsibilities:
     //   1. tickGuides() — always active, draws Grover-style particle outlines
@@ -164,6 +174,7 @@ public class SenderManager {
     public void tick() {
         // Guide outlines run regardless of transmission state
         tickGuides();
+        tickMissingDisplays();
 
         if (!sending) return;
         sendDelay++;
@@ -222,11 +233,13 @@ public class SenderManager {
             for (Entity guide : tagged(w, SENDER_CHEST)) {
                 Location loc = guide.getLocation();
                 Material blockType = loc.getBlock().getType();
+                boolean filled = guide.getScoreboardTags().contains("q_filled");
                 if (blockType == Material.CHEST || blockType == Material.TRAPPED_CHEST) {
-                    // Chest placed — flash green, remove guide
-                    flashGreen(w, loc);
-                    guide.remove();
+                    // Chest present — flash green once; keep the guide so it can return
+                    if (!filled) { flashGreen(w, loc); guide.addScoreboardTag("q_filled"); }
                 } else {
+                    // No chest → draw the outline again (returns if the chest was removed)
+                    if (filled) guide.getScoreboardTags().remove("q_filled");
                     drawSlotOutline(w, loc);
                 }
             }
@@ -267,6 +280,74 @@ public class SenderManager {
     }
 
     // =========================================================================
+    // "Missing: filters/photons" display above the sender's double chest
+    // (always on, so it works outside the tutorial too)
+    // =========================================================================
+
+    private void tickMissingDisplays() {
+        for (World w : plugin.getServer().getWorlds()) {
+            Set<Entity> keep = new HashSet<>();
+            for (Entity sender : tagged(w, SENDER)) {
+                Block chest = findDoubleChestNear(sender.getLocation());
+                if (chest == null) continue;
+                TextDisplay d = ensureMissing(w, chest, senderMissing(chest));
+                if (d != null) keep.add(d);
+            }
+            for (Entity e : new ArrayList<>(tagged(w, MISSING_TAG))) if (!keep.contains(e)) e.remove();
+        }
+    }
+
+    private Block findDoubleChestNear(Location loc) {
+        int[][] offsets = {{1,0,0},{-1,0,0},{0,0,1},{0,0,-1},{2,0,0},{-2,0,0},{0,0,2},{0,0,-2},
+                           {1,0,1},{1,0,-1},{-1,0,1},{-1,0,-1}};
+        for (int[] o : offsets) {
+            Block b = loc.getBlock().getRelative(o[0], o[1], o[2]);
+            if (b.getType() == Material.CHEST && b.getState() instanceof Container c && c.getInventory().getSize() >= 54) return b;
+        }
+        return null;
+    }
+
+    private String senderMissing(Block chest) {
+        Inventory inv = ((Container) chest.getState()).getInventory();
+        boolean f = allFilled(inv, BASIS_SLOTS, true);
+        boolean g = allFilled(inv, BIT_SLOTS, false);
+        if (f && g) return null;
+        List<String> miss = new ArrayList<>();
+        if (!f) miss.add("filters");
+        if (!g) miss.add("photons");
+        return "Missing: " + String.join(", ", miss);
+    }
+
+    private boolean allFilled(Inventory inv, int[] slots, boolean filter) {
+        for (int s : slots) {
+            ItemStack it = inv.getItem(s);
+            if (it == null) return false;
+            Material m = it.getType();
+            if (filter) { if (m != Material.COMPASS && m != Material.RECOVERY_COMPASS) return false; }
+            else        { if (m != Material.RED_STAINED_GLASS && m != Material.BLUE_STAINED_GLASS) return false; }
+        }
+        return true;
+    }
+
+    private TextDisplay ensureMissing(World w, Block chest, String missing) {
+        Location at = chest.getLocation().add(0.5, 2.0, 0.5);
+        TextDisplay disp = null;
+        for (Entity e : w.getNearbyEntities(at, 1.0, 2.0, 1.0)) {
+            if (e instanceof TextDisplay td && e.getScoreboardTags().contains(MISSING_TAG)) { disp = td; break; }
+        }
+        if (missing == null) { if (disp != null) disp.remove(); return null; }
+        if (disp == null) {
+            disp = (TextDisplay) w.spawnEntity(at, EntityType.TEXT_DISPLAY);
+            disp.setBillboard(Display.Billboard.CENTER);
+            disp.setShadowed(true);
+            disp.setTransformation(new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.8f), new Quaternionf()));
+            disp.addScoreboardTag(MISSING_TAG);
+        }
+        disp.text(Component.text(missing, NamedTextColor.RED));
+        return disp;
+    }
+
+    // =========================================================================
     // Helpers
     // =========================================================================
 
@@ -282,7 +363,7 @@ public class SenderManager {
     public void clearSender() {
         sending = false;
         for (World w : plugin.getServer().getWorlds()) {
-            killAll(w, SENDER); killAll(w, SENDER_VIS); killAll(w, SENDER_CHEST);
+            killAll(w, SENDER); killAll(w, SENDER_VIS); killAll(w, SENDER_CHEST); killAll(w, MISSING_TAG);
         }
     }
 

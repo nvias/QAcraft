@@ -11,23 +11,23 @@ import java.util.*;
 /**
  * Summon-on-demand particle "atom" effect.
  *
- * Each summon spawns an invisible MARKER entity tagged {@code q_plasma}.
- * Markers persist with chunks like any other quantum landmark — they survive
- * server restarts without any YAML/state file.
+ * Summoned / removed with the Plasma tools ({@code /qacraft plasma} hands them
+ * out) — NOT by command. Each summon spawns an invisible MARKER tagged
+ * {@code q_plasma} that persists with chunks across restarts.
  *
- * Every game tick the manager iterates all {@code q_plasma} markers in loaded
- * worlds and renders three particle layers around each one:
- *   1. Three orbital rings (blue/purple/green) in mutually perpendicular planes,
- *      each rotating at a slightly different speed.
- *   2. A pulsing central core (END_ROD cluster + cyan dust haze).
- *   3. Five tilted-orbit "electrons" — single END_ROD particles per tick whose
- *      natural ~1 s lifetime leaves a brief trail.
- *
- * Rendering is skipped for plasmas with no players within 60 blocks (perf guard).
+ * Rendering (per marker, only when a player is within range):
+ *   1. Three coloured rings (blue/purple/green) of DIFFERENT sizes, each on a
+ *      fixed distinct tilt, each precessing about the vertical axis at its own
+ *      speed. Dense points + a single simple sweep keep each ring recognisable
+ *      with only a short motion trail.
+ *   2. A pulsing central core.
+ *   3. A cloud of fast white "electrons" wandering in a shell hugging the rings,
+ *      each leaving a short END_ROD trail.
  */
 public class PlasmaManager {
 
     private final QAcraftPlugin plugin;
+    private final Random random = new Random();
     private int phase = 0;
 
     private static final org.bukkit.Color BB84_BLUE     = org.bukkit.Color.fromRGB(0x2E, 0x74, 0xB5);
@@ -35,34 +35,39 @@ public class PlasmaManager {
     private static final org.bukkit.Color E91_GREEN     = org.bukkit.Color.fromRGB(0x3C, 0xB3, 0x71);
     private static final org.bukkit.Color CORE_CYAN     = org.bukkit.Color.fromRGB(0x66, 0xFF, 0xFF);
 
-    private static final int    RING_POINTS    = 40;
-    private static final double RING_RADIUS    = 2.5;
-    private static final int    N_ELECTRONS    = 5;
-    private static final double ELECTRON_R     = 4.5;
-    private static final double RENDER_RANGE   = 60.0;
+    // Three rings: distinct radii (no overlap), distinct tilts (separable planes),
+    // distinct precession speeds. Dense points fill each ring cleanly.
+    private static final org.bukkit.Color[] RING_COLORS = { BB84_BLUE, GROVER_PURPLE, E91_GREEN };
+    private static final double[] RING_RADII  = { 1.8, 2.5, 3.2 };
+    private static final double[] RING_SPEED  = { 0.030, 0.020, 0.013 }; // precession rad/tick
+    private static final double[] RING_TILT_X = { 0.40, 1.30, 0.90 };
+    private static final double[] RING_TILT_Z = { 0.00, 0.60, 1.50 };
+    private static final double   POINT_DENSITY = 20.0; // points per block of radius
 
-    /** Per-plasma electron orbital parameters, keyed by marker UUID (lazily filled). */
-    private final Map<UUID, double[]> electronAngles = new HashMap<>();
-    private final Map<UUID, double[]> electronTilts  = new HashMap<>();
-    private final Random random = new Random();
+    private static final int    N_ELECTRONS = 4;
+    private static final double ELECTRON_R  = 2.8;
+    private static final double RENDER_RANGE = 60.0;
+
+    /** Per-plasma electrons: N × [x, y, z, vx, vy, vz]. */
+    private final Map<UUID, double[]> electronState = new HashMap<>();
 
     public PlasmaManager(QAcraftPlugin plugin) { this.plugin = plugin; }
 
     // =========================================================================
-    // Command-driven API
+    // Item-driven API (handlers live in ToolManager)
     // =========================================================================
 
     public void summon(Player p) {
         World w = p.getWorld();
-        // Place at eye level so the atom is at head height instead of at the feet
-        Location loc = p.getEyeLocation();
+        // A few blocks ahead at eye height so the atom appears in view, not on the player
+        Location loc = p.getEyeLocation().add(p.getEyeLocation().getDirection().multiply(4));
         Entity anchor = w.spawnEntity(loc, EntityType.MARKER);
         anchor.addScoreboardTag(Q_PLASMA);
         p.sendMessage(Component.text("Plasma summoned", NamedTextColor.AQUA)
             .append(Component.text(" at " + (int) loc.getX() + ", " + (int) loc.getY() + ", " + (int) loc.getZ(),
                 NamedTextColor.GRAY)));
         w.playSound(loc, Sound.BLOCK_BEACON_ACTIVATE, 0.6f, 1.5f);
-        w.spawnParticle(Particle.REVERSE_PORTAL, loc, 40, 0.5, 0.5, 0.5, 0.1);
+        w.spawnParticle(Particle.REVERSE_PORTAL, loc, 30, 0.5, 0.5, 0.5, 0.1);
     }
 
     public void despawnNearest(Player p) {
@@ -78,22 +83,20 @@ public class PlasmaManager {
             return;
         }
         Location loc = nearest.getLocation();
-        electronAngles.remove(nearest.getUniqueId());
-        electronTilts.remove(nearest.getUniqueId());
+        electronState.remove(nearest.getUniqueId());
         nearest.remove();
-        w.spawnParticle(Particle.REVERSE_PORTAL, loc, 30, 0.5, 0.5, 0.5, 0.1);
+        w.spawnParticle(Particle.REVERSE_PORTAL, loc, 25, 0.5, 0.5, 0.5, 0.1);
         w.playSound(loc, Sound.BLOCK_BEACON_DEACTIVATE, 0.6f, 1.5f);
-        p.sendMessage(Component.text("Plasma despawned.", NamedTextColor.GRAY));
+        p.sendMessage(Component.text("Plasma removed.", NamedTextColor.GRAY));
     }
 
     public void clearAll() {
-        electronAngles.clear();
-        electronTilts.clear();
+        electronState.clear();
         for (World w : plugin.getServer().getWorlds()) killAll(w, Q_PLASMA);
     }
 
     // =========================================================================
-    // Tick — render every active plasma
+    // Tick
     // =========================================================================
 
     public void tick() {
@@ -102,42 +105,42 @@ public class PlasmaManager {
             for (Entity anchor : tagged(w, Q_PLASMA)) {
                 Location centre = anchor.getLocation();
                 if (w.getNearbyPlayers(centre, RENDER_RANGE).isEmpty()) continue;
-                renderPlasma(w, centre, anchor.getUniqueId());
+                renderRings(w, centre);
+                renderCore(w, centre);
+                renderElectrons(w, centre, anchor.getUniqueId());
             }
         }
     }
 
-    private void renderPlasma(World w, Location centre, UUID id) {
-        renderRings(w, centre);
-        renderCore(w, centre);
-        renderElectrons(w, centre, id);
-    }
-
     // =========================================================================
-    // Layer 1 — three orbital rings (XY, XZ, YZ planes)
+    // Layer 1 — three differently-sized rings, each precessing at its own speed
     // =========================================================================
 
     private void renderRings(World w, Location c) {
-        double base = phase * 0.03;
-        drawRing(w, c, BB84_BLUE,     0, base);
-        drawRing(w, c, GROVER_PURPLE, 1, base * 1.2);
-        drawRing(w, c, E91_GREEN,     2, base * 1.5);
+        for (int i = 0; i < 3; i++) {
+            double precess = phase * RING_SPEED[i];
+            drawRing(w, c, RING_COLORS[i], RING_RADII[i], RING_TILT_X[i], RING_TILT_Z[i], precess);
+        }
     }
 
-    private void drawRing(World w, Location c, org.bukkit.Color color, int planeAxis, double phaseOffset) {
-        Particle.DustOptions opts = new Particle.DustOptions(color, 1.2f);
-        double cx0 = c.getX(), cy0 = c.getY(), cz0 = c.getZ();
-        for (int i = 0; i < RING_POINTS; i++) {
-            double theta = (2.0 * java.lang.Math.PI * i / RING_POINTS) + phaseOffset;
-            double a = java.lang.Math.cos(theta) * RING_RADIUS;
-            double b = java.lang.Math.sin(theta) * RING_RADIUS;
-            double x, y, z;
-            switch (planeAxis) {
-                case 0 -> { x = a; y = b; z = 0; } // XY plane (rotates around Z)
-                case 1 -> { x = a; y = 0; z = b; } // XZ plane (rotates around Y)
-                default -> { x = 0; y = a; z = b; } // YZ plane (rotates around X)
-            }
-            w.spawnParticle(Particle.DUST, cx0 + x, cy0 + y, cz0 + z, 1, 0, 0, 0, 0, opts);
+    private void drawRing(World w, Location c, org.bukkit.Color color, double radius,
+                          double tiltX, double tiltZ, double precess) {
+        int points = (int) Math.round(radius * POINT_DENSITY);
+        double cX = Math.cos(tiltX), sX = Math.sin(tiltX);
+        double cZ = Math.cos(tiltZ), sZ = Math.sin(tiltZ);
+        double cP = Math.cos(precess), sP = Math.sin(precess);
+        Particle.DustOptions opts = new Particle.DustOptions(color, 1.0f);
+        double cx = c.getX(), cy = c.getY(), cz = c.getZ();
+
+        for (int j = 0; j < points; j++) {
+            double theta = (2.0 * Math.PI * j) / points;
+            double lx = Math.cos(theta) * radius, ly = Math.sin(theta) * radius, lz = 0;
+            // fixed tilt about X, then about Z → gives this ring its own plane
+            double y1 = ly * cX - lz * sX, z1 = ly * sX + lz * cX, x1 = lx;
+            double x2 = x1 * cZ - y1 * sZ, y2 = x1 * sZ + y1 * cZ, z2 = z1;
+            // precession about the vertical (Y) axis → visible spin, short sweep
+            double x3 = x2 * cP + z2 * sP, z3 = -x2 * sP + z2 * cP, y3 = y2;
+            w.spawnParticle(Particle.DUST, cx + x3, cy + y3, cz + z3, 1, 0, 0, 0, 0, opts);
         }
     }
 
@@ -146,36 +149,56 @@ public class PlasmaManager {
     // =========================================================================
 
     private void renderCore(World w, Location c) {
-        double pulse = 0.3 + java.lang.Math.sin(phase * 0.1) * 0.15;
-        w.spawnParticle(Particle.END_ROD, c.getX(), c.getY(), c.getZ(), 3, pulse, pulse, pulse, 0);
+        double pulse = 0.3 + Math.sin(phase * 0.1) * 0.15;
+        w.spawnParticle(Particle.END_ROD, c.getX(), c.getY(), c.getZ(), 2, pulse, pulse, pulse, 0);
         Particle.DustOptions cyan = new Particle.DustOptions(CORE_CYAN, 1.5f);
-        w.spawnParticle(Particle.DUST, c.getX(), c.getY(), c.getZ(), 5, 0.4, 0.4, 0.4, 0, cyan);
+        w.spawnParticle(Particle.DUST, c.getX(), c.getY(), c.getZ(), 3, 0.35, 0.35, 0.35, 0, cyan);
     }
 
     // =========================================================================
-    // Layer 3 — 5 tilted-orbit electrons with natural particle trails
+    // Layer 3 — fast, randomly wandering electrons in a shell near the rings
     // =========================================================================
 
     private void renderElectrons(World w, Location c, UUID id) {
-        double[] angles = electronAngles.computeIfAbsent(id, k -> {
-            double[] a = new double[N_ELECTRONS];
-            for (int i = 0; i < N_ELECTRONS; i++) a[i] = random.nextDouble() * 2.0 * java.lang.Math.PI;
+        double[] es = electronState.computeIfAbsent(id, k -> {
+            double[] a = new double[N_ELECTRONS * 6];
+            for (int n = 0; n < N_ELECTRONS; n++) {
+                int b = n * 6;
+                double u = random.nextDouble() * 2 - 1;          // cos(phi)
+                double t = random.nextDouble() * Math.PI * 2;    // azimuth
+                double s = Math.sqrt(1 - u * u);
+                a[b]     = Math.cos(t) * s * ELECTRON_R;
+                a[b + 1] = u * ELECTRON_R;
+                a[b + 2] = Math.sin(t) * s * ELECTRON_R;
+                a[b + 3] = (random.nextDouble() - 0.5) * 0.25;
+                a[b + 4] = (random.nextDouble() - 0.5) * 0.25;
+                a[b + 5] = (random.nextDouble() - 0.5) * 0.25;
+            }
             return a;
         });
-        double[] tilts = electronTilts.computeIfAbsent(id, k -> {
-            double[] t = new double[N_ELECTRONS];
-            for (int i = 0; i < N_ELECTRONS; i++) t[i] = (java.lang.Math.PI / N_ELECTRONS) * i + random.nextDouble();
-            return t;
-        });
 
-        for (int i = 0; i < N_ELECTRONS; i++) {
-            angles[i] += 0.07;
-            double theta = angles[i];
-            double tilt  = tilts[i];
-            double x = java.lang.Math.cos(theta) * ELECTRON_R * java.lang.Math.cos(tilt);
-            double y = java.lang.Math.sin(theta) * ELECTRON_R;
-            double z = java.lang.Math.cos(theta) * ELECTRON_R * java.lang.Math.sin(tilt);
-            w.spawnParticle(Particle.END_ROD, c.getX() + x, c.getY() + y, c.getZ() + z, 1, 0, 0, 0, 0);
+        for (int n = 0; n < N_ELECTRONS; n++) {
+            int b = n * 6;
+            // stronger random acceleration + lighter damping → noticeably faster drift
+            for (int k = 3; k <= 5; k++) {
+                es[b + k] = es[b + k] * 0.82 + (random.nextDouble() - 0.5) * 0.09;
+                if (es[b + k] >  0.28) es[b + k] =  0.28;
+                if (es[b + k] < -0.28) es[b + k] = -0.28;
+            }
+            es[b]     += es[b + 3];
+            es[b + 1] += es[b + 4];
+            es[b + 2] += es[b + 5];
+
+            // soft spring back to the shell radius so they keep hugging the rings
+            double r = Math.sqrt(es[b] * es[b] + es[b + 1] * es[b + 1] + es[b + 2] * es[b + 2]);
+            if (r < 1e-3) r = 1e-3;
+            double scale = 1 + 0.06 * (ELECTRON_R - r) / r;
+            es[b]     *= scale;
+            es[b + 1] *= scale;
+            es[b + 2] *= scale;
+
+            w.spawnParticle(Particle.END_ROD, c.getX() + es[b], c.getY() + es[b + 1], c.getZ() + es[b + 2],
+                1, 0, 0, 0, 0);
         }
     }
 }

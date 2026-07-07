@@ -58,7 +58,8 @@ All commands are under `/qacraft` (aliases: `/q`, `/qac`).
 | Command | Description |
 |---|---|
 | `/qacraft help` | Show the in-game help |
-| `/qacraft tools <bb84\|grover\|e91\|all>` | Give a protocol's tools (Eraser always lands in slot 9) |
+| `/qacraft tools <bb84\|grover\|e91\|all>` | Give a protocol's tools (clears your inventory first; Eraser in slot 9) |
+| `/qacraft item <name>` | Give one named tool **without** clearing your inventory (tab-complete for names) |
 | `/qacraft clear` | Remove every QAcraft entity in all worlds |
 
 ### BB84 — Quantum Key Distribution
@@ -78,17 +79,23 @@ All commands are under `/qacraft` (aliases: `/q`, `/qac`).
 
 ### Grover's Search
 
+Multiple independent grids can run at once — each is identified by an id shown on a
+big number floating in its centre. Give the id after each command (omit it when only
+one grid exists).
+
 | Command | Description |
 |---|---|
-| `/qacraft grover setup` | Mark 8 positions in a ring around you |
-| `/qacraft grover placechests` | Auto-place chests on the marked positions |
-| `/qacraft grover fillwool` | Put a random wool colour in each chest |
-| `/qacraft grover iterate` | Run one Grover iteration (or throw a Wind Charge) |
-| `/qacraft grover reset` | Reset to equal superposition |
-| `/qacraft grover clear` | Remove all Grover entities |
+| `/qacraft grover setup [id]` | Mark 8 positions in a ring (new grid; auto-assigns the lowest free id) |
+| `/qacraft grover placechests [id]` | Auto-place chests on the marked positions |
+| `/qacraft grover fillwool [id]` | Put a random wool colour in each chest |
+| `/qacraft grover iterate [id]` | Run one Grover iteration (or throw a Wind Charge — iterates the nearest grid) |
+| `/qacraft grover reset [id]` | Reset to equal superposition |
+| `/qacraft grover clear [id]` | Remove one grid; without an id, remove all |
+| `/qacraft grover list` | List the active grids and their iteration counts |
 
 Hold the **Spyglass** in your main hand and your target block in the offhand to see
-the probability columns after the first iteration.
+the probability columns after the first iteration. Searching for a new item restarts
+that grid. Drop the **Grover Reset** (TNT) on a grid's centre block to deactivate it.
 
 ### E91 — Entanglement Protocol
 
@@ -110,12 +117,17 @@ measure it in the rectilinear, diagonal, or circular basis.
 
 | Command | Description |
 |---|---|
-| `/qacraft plasma <summon\|despawn\|clear>` | Floating particle "atom" with orbiting rings and electrons |
-| `/qacraft tutorial <start\|next\|back\|goto\|stop>` | Guided step-by-step walkthrough |
-| `/qacraft tutorial <spawn\|clear\|reload>` | Manage the floating station signs (admin) |
+| `/qacraft plasma` | Get the Plasma tools — right-click **Heart of the Sea** to summon a particle "atom", **Echo Shard** to remove the nearest |
+| `/qacraft plasma clear` | Remove all plasmas |
+| `/qacraft world build` | Build a decorated tutorial hall (Lobby → BB84 → Grover → E91) next to you |
+| `/qacraft world clear` | Remove the hall and restore the ground |
+| `/qacraft tutorial start` | Start the interactive, gated walkthrough inside the built hall |
+| `/qacraft tutorial stop` | End the walkthrough (clears placed apparatus and chests) |
 
-Tutorial steps live in `plugins/QAcraft/tutorial.yml` — edit the coordinates to fit
-your own world, then `/qacraft tutorial reload`.
+The **interactive tutorial** teleports you into the hall and guides you step by step:
+each protocol room must be completed hands-on before its door opens. Wall panels, floating
+"X here" markers, live "Missing: …" chest hints, and in-room "give tools" buttons walk a
+newcomer through every experiment.
 
 ---
 
@@ -130,13 +142,19 @@ your own world, then `/qacraft tutorial reload`.
 | Carrot on a Stick | Quantum cable (waypoint) | BB84 |
 | Warped Fungus on a Stick | Parking spot | BB84 |
 | Nether Star | Quantum sender | BB84 |
-| Breeze Rod | Quantum gate | BB84 |
-| Wind Charge | Grover operator | Grover |
+| Eye of Ender | Quantum gate | BB84 |
+| Fire Charge | Grover setup (new grid) | Grover |
+| Conduit | Place chests on the nearest grid | Grover |
+| Wind Charge | Grover operator (iterate) | Grover |
 | Spyglass | Quantum observer | Grover |
+| TNT | Grover reset (drop on grid centre) | Grover |
 | Amethyst Shard | EPR source | E91 |
 | Diamond Axe | Alice landing pad (R) / zone (L) | E91 |
 | Gold Axe | Bob landing pad (R) / zone (L) | E91 |
+| Heart of the Sea / Echo Shard | Plasma summon / remove | Lobby |
 | Brush (slot 9) | Quantum eraser | all |
+
+Filter colours mirror the compasses: **Rectilinear** red, **Diagonal** cyan, **Circular** yellow.
 
 ---
 

@@ -20,6 +20,8 @@ public class QAcraftPlugin extends JavaPlugin {
     private E91Manager e91Manager;
     private PlasmaManager plasmaManager;
     private TutorialManager tutorialManager;
+    private TutorialWorldBuilder worldBuilder;
+    private InteractiveTutorial interactiveTutorial;
 
     @Override
     public void onEnable() {
@@ -36,14 +38,17 @@ public class QAcraftPlugin extends JavaPlugin {
         measurementManager = new MeasurementManager(this);
         groverManager      = new GroverManager(this);
         e91Manager         = new E91Manager(this);
-        plasmaManager      = new PlasmaManager(this);
-        tutorialManager    = new TutorialManager(this);
+        plasmaManager       = new PlasmaManager(this);
+        tutorialManager     = new TutorialManager(this);
+        worldBuilder        = new TutorialWorldBuilder(this);
+        interactiveTutorial = new InteractiveTutorial(this);
 
         getServer().getPluginManager().registerEvents(toolManager, this);
         getServer().getPluginManager().registerEvents(eraserManager, this);
         getServer().getPluginManager().registerEvents(measurementManager, this);
         getServer().getPluginManager().registerEvents(groverManager, this);
         getServer().getPluginManager().registerEvents(e91Manager, this);
+        getServer().getPluginManager().registerEvents(interactiveTutorial, this);
 
         QAcraftCommand cmd = new QAcraftCommand(this);
         getCommand("qacraft").setExecutor(cmd);
@@ -57,6 +62,7 @@ public class QAcraftPlugin extends JavaPlugin {
             groverManager.tick();
             e91Manager.tick();
             plasmaManager.tick();
+            interactiveTutorial.tick();
         }, 1L, 1L);
 
         // Auto-save runtime state every 60 s as a crash safety net
@@ -121,4 +127,6 @@ public class QAcraftPlugin extends JavaPlugin {
     public E91Manager         getE91Manager()         { return e91Manager; }
     public PlasmaManager      getPlasmaManager()      { return plasmaManager; }
     public TutorialManager    getTutorialManager()    { return tutorialManager; }
+    public TutorialWorldBuilder getWorldBuilder()     { return worldBuilder; }
+    public InteractiveTutorial getInteractiveTutorial() { return interactiveTutorial; }
 }
