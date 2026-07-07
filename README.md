@@ -55,7 +55,8 @@ The quickest way to meet the plugin — build the tutorial hall and take the gui
 walkthrough:
 
 1. `/qacraft world build` — builds a decorated tutorial hall (Lobby → BB84 → Grover → E91) next to you.
-2. `/qacraft tutorial start` — starts the interactive, gated walkthrough inside it.
+2. `/qacraft tutorial start` — starts the interactive, gated walkthrough inside it
+   (or press the **Start Tutorial** button in the hall lobby).
 
 The tutorial teleports you into the hall and guides you step by step: each protocol
 room must be completed hands-on before its door opens. Wall panels, floating
@@ -108,9 +109,11 @@ one grid exists).
 | `/qacraft grover clear [id]` | Remove one grid; without an id, remove all |
 | `/qacraft grover list` | List the active grids and their iteration counts |
 
-Hold the **Spyglass** in your main hand and your target block in the offhand to see
-the probability columns after the first iteration. Searching for a new item restarts
-that grid. Drop the **Grover Reset** (TNT) on a grid's centre block to deactivate it.
+The first iteration runs only while you hold the item you are searching for — it
+becomes the grid's target. Hold the **Spyglass** in your main hand and the target in
+the offhand to see the probability columns after the first iteration. Searching for a
+new item restarts that grid. Drop the **Grover Reset** (TNT) on a grid's centre block
+to deactivate it.
 
 ### E91 — Entanglement Protocol
 

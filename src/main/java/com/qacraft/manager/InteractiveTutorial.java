@@ -310,7 +310,7 @@ public class InteractiveTutorial implements Listener {
             () -> anyInZone(GroverManager.GROVER_CHEST, 2)));
         l.add(new Step("Fill with wool", "Run /q grover fillwool 1", null, cx, oz, 0, null,
             this::groverHasWool));
-        l.add(new Step("Search & observe", "Hold Spyglass + wool, throw a Wind Charge, then look at the chests", null, cx, oz, 10, null,
+        l.add(new Step("Search & observe", "Hold your target wool (offhand), throw a Wind Charge, then look through the Spyglass", null, cx, oz, 10, null,
             () -> plugin.getGroverManager().wasObserved()));
         return l;
     }
@@ -369,6 +369,25 @@ public class InteractiveTutorial implements Listener {
         if (x == ox - 1 || x == ox + total)      return true;   // entrance / back wall
         for (int d = 0; d < 3; d++) if (x == doorX(d)) return true; // dividers + iron-bar doors
         return false;
+    }
+
+    /** Lobby "Start Tutorial" button — same entry point as /qacraft tutorial start. */
+    @EventHandler
+    public void onStartButton(PlayerInteractEvent e) {
+        if (e.getAction() != Action.RIGHT_CLICK_BLOCK || e.getClickedBlock() == null) return;
+        if (e.getClickedBlock().getType() != Material.STONE_BUTTON) return;
+        Location c = e.getClickedBlock().getLocation().add(0.5, 0.5, 0.5);
+        boolean isStart = false;
+        for (Entity m : e.getClickedBlock().getWorld().getNearbyEntities(c, 0.6, 0.6, 0.6)) {
+            if (m.getType() == EntityType.MARKER && m.getScoreboardTags().contains(Q_STARTBTN)) { isStart = true; break; }
+        }
+        if (!isStart) return;
+        e.setCancelled(true);
+        if (active) {
+            e.getPlayer().sendMessage(Component.text("A walkthrough is already running — finish or /q tutorial stop first.", NamedTextColor.GRAY));
+            return;
+        }
+        start(e.getPlayer());
     }
 
     @EventHandler

@@ -263,7 +263,7 @@ public class QAcraftCommand implements CommandExecutor, TabCompleter {
         p.sendMessage(Component.text("/qacraft grover reset|clear [id]", NamedTextColor.YELLOW).append(Component.text(" — reset / remove (clear w/o id = all)", NamedTextColor.GRAY)));
         p.sendMessage(Component.text("/qacraft grover list", NamedTextColor.YELLOW).append(Component.text(" — show active instances", NamedTextColor.GRAY)));
         p.sendMessage(Component.text("Multiple instances run at once — id ties commands together. Omit id if only one.", NamedTextColor.DARK_GRAY));
-        p.sendMessage(Component.text("Hold any item (offhand) + spyglass (main) to see probabilities", NamedTextColor.GRAY));
+        p.sendMessage(Component.text("Hold the searched item (offhand) to iterate; spyglass (main) shows probabilities", NamedTextColor.GRAY));
         p.sendMessage(Component.text(""));
         p.sendMessage(Component.text("=== E91 ENTANGLEMENT PROTOCOL ===", NamedTextColor.LIGHT_PURPLE));
         p.sendMessage(Component.text("/qacraft e91 source|alice|bob", NamedTextColor.YELLOW).append(Component.text(" — place landmarks", NamedTextColor.GRAY)));

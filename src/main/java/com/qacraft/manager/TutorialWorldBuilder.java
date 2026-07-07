@@ -159,6 +159,36 @@ public class TutorialWorldBuilder {
         plasma.addScoreboardTag(Q_WORLD);
         plasma.addScoreboardTag(Q_PLASMA);
         pedestal(w, cx, oy, oz, Material.SEA_LANTERN);
+        startButton(w, zx + 2, oy, oz + HALF_W - 1);
+    }
+
+    /**
+     * The lobby "start tutorial" station: end rod + stone button + green label.
+     * Pressing it starts the interactive walkthrough (handled by InteractiveTutorial).
+     */
+    private void startButton(World w, int x, int oy, int z) {
+        Block rod = w.getBlockAt(x, oy, z);
+        rod.setType(Material.END_ROD, false);
+        try { Directional d = (Directional) rod.getBlockData(); d.setFacing(BlockFace.DOWN); rod.setBlockData(d, false); } catch (Exception ignored) {}
+
+        Block btn = w.getBlockAt(x, oy + 1, z);
+        btn.setType(Material.STONE_BUTTON, false);
+        try { Switch sw = (Switch) btn.getBlockData(); sw.setAttachedFace(FaceAttachable.AttachedFace.FLOOR); btn.setBlockData(sw, false); } catch (Exception ignored) {}
+
+        Entity marker = w.spawnEntity(new Location(w, x + 0.5, oy + 1, z + 0.5), EntityType.MARKER);
+        marker.addScoreboardTag(Q_STARTBTN);
+        marker.addScoreboardTag(Q_WORLD);
+
+        Component txt = Component.text("Start", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true)
+            .append(Component.text("\nTutorial", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true));
+        TextDisplay td = (TextDisplay) w.spawnEntity(new Location(w, x + 0.5, oy + 1.9, z + 0.5, FACE_NORTH, 0f), EntityType.TEXT_DISPLAY);
+        td.text(txt);
+        td.setBillboard(Display.Billboard.FIXED);
+        td.setRotation(FACE_NORTH, 0f);
+        td.setShadowed(true);
+        td.setTransformation(new Transformation(new Vector3f(), new Quaternionf(), new Vector3f(0.55f), new Quaternionf()));
+        td.addScoreboardTag(Q_STARTBTN);
+        td.addScoreboardTag(Q_WORLD);
     }
 
     private void decorateBB84(World w, int zx, int oy, int oz) {
@@ -174,7 +204,7 @@ public class TutorialWorldBuilder {
             "Try it",
             "1) Nether Star = Sender (yellow spot)",
             "2) Double chest on markers, /q sender fill",
-            "3) Fill bit slots with red/blue glass",
+            "3) Fill bit slots with red/blue glass panes",
             "4) Eye of Ender = Gate (purple spot) + chest",
             "5) Fill Gate chest with Compasses",
             "6) Quantum Cable behind the Gate",
@@ -203,13 +233,13 @@ public class TutorialWorldBuilder {
             "Grover — how it works",
             "Finds a marked item in ~sqrt(N) steps.",
             "With 8 chests, ~2 iterations",
-            "reach about 97.7%.");
+            "reach about 94.5%.");
         panel(w, zx + 12, oy + 2.1, oz - HALF_W - 0.4, FACE_SOUTH,
             "Try it",
             "1) Fire Charge = new grid (or /q grover setup)",
             "2) Conduit = place chests, then /q grover fillwool",
-            "3) Spyglass + target wool in offhand",
-            "4) Throw Wind Charge to iterate & observe");
+            "3) Hold target wool (offhand) + throw Wind Charge",
+            "4) Observe: Spyglass + the wool in offhand");
         panel(w, cx, oy + 2.1, oz + HALF_W + 0.4, FACE_NORTH,
             "Multiple searches",
             "Each grid has its own id (shown in the",

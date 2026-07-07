@@ -26,10 +26,10 @@ public class QAcraftEntity {
         E91_PARK_A = "q_e91_park_a",   // Alice's flat parking pad (marker + vis + label)
         E91_PARK_B = "q_e91_park_b",   // Bob's flat parking pad (marker + vis + label)
         Q_PLASMA   = "q_plasma",       // Lobby plasma anchor (Marker entity) — rendered by PlasmaManager
-        Q_TUTORIAL_DISPLAY = "q_tutorial_display", // TextDisplay tutorial station signs
         Q_WORLD    = "q_world",        // Tutorial-world builder entities (titles, panels, showcases, origin)
         Q_TUT      = "q_tut",          // Interactive-walkthrough runtime entities (step labels, next-room button)
-        Q_TOOLBTN  = "q_toolbtn";      // In-room "give tools" button marker + its label (num = 1 bb84 / 2 grover / 3 e91)
+        Q_TOOLBTN  = "q_toolbtn",      // In-room "give tools" button marker + its label (num = 1 bb84 / 2 grover / 3 e91)
+        Q_STARTBTN = "q_startbtn";     // Lobby "start tutorial" button marker + its label
 
     public static List<Entity> tagged(World w, String tag) {
         List<Entity> r = new ArrayList<>();

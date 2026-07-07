@@ -302,6 +302,19 @@ public class GroverManager implements Listener {
         iterate(p, gid);
     }
 
+    /**
+     * The item the player is "searching for": offhand first (main hand usually
+     * holds the Wind Charge or Spyglass), else the main hand — excluding the
+     * Grover tools themselves. Null when no candidate item is held.
+     */
+    private Material heldSearchTarget(Player p) {
+        Material off = p.getInventory().getItemInOffHand().getType();
+        if (off != Material.AIR) return off;
+        Material main = p.getInventory().getItemInMainHand().getType();
+        if (main == Material.AIR || main == Material.WIND_CHARGE || main == Material.SPYGLASS) return null;
+        return main;
+    }
+
     /** Find the instance whose nearest entity is closest to the player. */
     private int nearestGid(Player p) {
         World w = p.getWorld();
@@ -334,7 +347,20 @@ public class GroverManager implements Listener {
         gid = resolve(p, gid);
         if (gid < 0) return;
 
-        int iteration = iterations.getOrDefault(gid, 0) + 1;
+        // The FIRST iteration requires holding the searched item — it becomes
+        // the grid's search target (Grover needs to know what it is looking for).
+        int current = iterations.getOrDefault(gid, 0);
+        if (current == 0) {
+            Material target = heldSearchTarget(p);
+            if (target == null) {
+                p.sendMessage(Component.text("Hold the item you are searching for (offhand) to run the first iteration.",
+                    NamedTextColor.RED));
+                return;
+            }
+            instanceSearch.put(gid, target);
+        }
+
+        int iteration = current + 1;
         iterations.put(gid, iteration);
 
         World w = p.getWorld();
