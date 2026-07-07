@@ -49,6 +49,21 @@ The compiled plugin lands at **`target/QAcraft.jar`**.
 
 ---
 
+## Try it on your own
+
+The quickest way to meet the plugin — build the tutorial hall and take the guided
+walkthrough:
+
+1. `/qacraft world build` — builds a decorated tutorial hall (Lobby → BB84 → Grover → E91) next to you.
+2. `/qacraft tutorial start` — starts the interactive, gated walkthrough inside it.
+
+The tutorial teleports you into the hall and guides you step by step: each protocol
+room must be completed hands-on before its door opens. Wall panels, floating
+"X here" markers, live "Missing: …" chest hints, and in-room "give tools" buttons
+walk a newcomer through every experiment.
+
+---
+
 ## Commands
 
 All commands are under `/qacraft` (aliases: `/q`, `/qac`).
@@ -123,11 +138,6 @@ measure it in the rectilinear, diagonal, or circular basis.
 | `/qacraft world clear` | Remove the hall and restore the ground |
 | `/qacraft tutorial start` | Start the interactive, gated walkthrough inside the built hall |
 | `/qacraft tutorial stop` | End the walkthrough (clears placed apparatus and chests) |
-
-The **interactive tutorial** teleports you into the hall and guides you step by step:
-each protocol room must be completed hands-on before its door opens. Wall panels, floating
-"X here" markers, live "Missing: …" chest hints, and in-room "give tools" buttons walk a
-newcomer through every experiment.
 
 ---
 
