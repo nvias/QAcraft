@@ -41,8 +41,8 @@ public class ToolManager implements Listener {
         );
         p.getInventory().setItem(8, makeItem(Material.BRUSH, "Quantum Eraser", NamedTextColor.GRAY));
         // Bit-value glass (row 1) + spare filters (row 2) in the main inventory, not the hotbar
-        p.getInventory().setItem(9,  new ItemStack(Material.BLUE_STAINED_GLASS, 64));
-        p.getInventory().setItem(10, new ItemStack(Material.RED_STAINED_GLASS, 64));
+        p.getInventory().setItem(9,  new ItemStack(Material.BLUE_STAINED_GLASS_PANE, 64));
+        p.getInventory().setItem(10, new ItemStack(Material.RED_STAINED_GLASS_PANE, 64));
         ItemStack rf = rectilinearFilter(); rf.setAmount(64);
         ItemStack df = diagonalFilter();    df.setAmount(64);
         p.getInventory().setItem(18, rf);
@@ -187,8 +187,8 @@ public class ToolManager implements Listener {
             case "eraser", "brush"                 -> makeItem(Material.BRUSH, "Quantum Eraser", NamedTextColor.GRAY);
             case "plasma-summon", "heart"          -> makeItem(Material.HEART_OF_THE_SEA, "Plasma Summoner", NamedTextColor.AQUA);
             case "plasma-remove", "echo"           -> makeItem(Material.ECHO_SHARD, "Plasma Remover", NamedTextColor.DARK_GRAY);
-            case "red-glass"                       -> new ItemStack(Material.RED_STAINED_GLASS, 64);
-            case "blue-glass"                      -> new ItemStack(Material.BLUE_STAINED_GLASS, 64);
+            case "red-glass"                       -> new ItemStack(Material.RED_STAINED_GLASS_PANE, 64);
+            case "blue-glass"                      -> new ItemStack(Material.BLUE_STAINED_GLASS_PANE, 64);
             default -> null;
         };
     }

@@ -145,7 +145,7 @@ public class GateManager {
 
         // Write result to corresponding result row (row 2, 4, or 6)
         int resultSlot = slot + 9;
-        inv.setItem(resultSlot, new ItemStack(result == 0 ? Material.BLUE_STAINED_GLASS : Material.RED_STAINED_GLASS, 1));
+        inv.setItem(resultSlot, new ItemStack(result == 0 ? Material.BLUE_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE, 1));
 
         // Flash gate visual
         Entity gateVis = findLabel(w, GATE_VIS, gateNum);

@@ -208,8 +208,9 @@ public class SenderManager {
                 if (resultSlot < inv.getSize()) {
                     ItemStack bitItem = inv.getItem(resultSlot);
                     if (bitItem != null) {
-                        if (bitItem.getType() == Material.RED_STAINED_GLASS)  bit = 1;
-                        if (bitItem.getType() == Material.BLUE_STAINED_GLASS) bit = 0;
+                        // panes are the standard bit items; legacy solid glass still accepted
+                        if (bitItem.getType() == Material.RED_STAINED_GLASS_PANE  || bitItem.getType() == Material.RED_STAINED_GLASS)  bit = 1;
+                        if (bitItem.getType() == Material.BLUE_STAINED_GLASS_PANE || bitItem.getType() == Material.BLUE_STAINED_GLASS) bit = 0;
                     }
                 }
 
@@ -324,7 +325,8 @@ public class SenderManager {
             if (it == null) return false;
             Material m = it.getType();
             if (filter) { if (m != Material.COMPASS && m != Material.RECOVERY_COMPASS) return false; }
-            else        { if (m != Material.RED_STAINED_GLASS && m != Material.BLUE_STAINED_GLASS) return false; }
+            else        { if (m != Material.RED_STAINED_GLASS_PANE && m != Material.BLUE_STAINED_GLASS_PANE
+                           && m != Material.RED_STAINED_GLASS && m != Material.BLUE_STAINED_GLASS) return false; }
         }
         return true;
     }

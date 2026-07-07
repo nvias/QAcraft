@@ -286,7 +286,7 @@ public class InteractiveTutorial implements Listener {
             () -> entityAt(SENDER, zx + 4, oz)));
         l.add(new Step("Place a double chest", "Put chests on BOTH highlighted blocks", "Double chest here", zx + 4, oz, 0, SENDER_CHEST,
             () -> doubleChestNearEntity(SENDER, 1, 3.0) != null));
-        l.add(new Step("Fill the chest", "Run /q sender fill, then fill every slot with red or blue glass", null, zx + 4, oz, 0, null,
+        l.add(new Step("Fill the chest", "Run /q sender fill, then fill every slot with red or blue glass panes", null, zx + 4, oz, 0, null,
             () -> senderChestReady(zx + 4, oz)));
         l.add(new Step("Place the Gate", "Right-click the Eye of Ender on the purple spot", "Gate here", zx + 8, oz, 0, null,
             () -> entityAt(GATE, zx + 8, oz)));
@@ -471,7 +471,8 @@ public class InteractiveTutorial implements Listener {
         Inventory inv = doubleChestNearEntity(SENDER, 1, 3.0);
         if (inv == null) return false;
         return allSlots(inv, BASIS_SLOTS, m -> m == Material.COMPASS || m == Material.RECOVERY_COMPASS)
-            && allSlots(inv, BIT_SLOTS,   m -> m == Material.RED_STAINED_GLASS || m == Material.BLUE_STAINED_GLASS);
+            && allSlots(inv, BIT_SLOTS,   m -> m == Material.RED_STAINED_GLASS_PANE || m == Material.BLUE_STAINED_GLASS_PANE
+                                            || m == Material.RED_STAINED_GLASS || m == Material.BLUE_STAINED_GLASS);
     }
 
     /** Gate chest ready: every basis slot has a filter (Compass / Recovery Compass). */
@@ -533,7 +534,8 @@ public class InteractiveTutorial implements Listener {
         if (!(cl.getBlock().getState() instanceof Container c)) return null;
         Inventory inv = c.getInventory();
         boolean f = allSlots(inv, BASIS_SLOTS, m -> m == Material.COMPASS || m == Material.RECOVERY_COMPASS);
-        boolean g = allSlots(inv, BIT_SLOTS,   m -> m == Material.RED_STAINED_GLASS || m == Material.BLUE_STAINED_GLASS);
+        boolean g = allSlots(inv, BIT_SLOTS,   m -> m == Material.RED_STAINED_GLASS_PANE || m == Material.BLUE_STAINED_GLASS_PANE
+                                                 || m == Material.RED_STAINED_GLASS || m == Material.BLUE_STAINED_GLASS);
         if (f && g) return null;
         java.util.List<String> miss = new java.util.ArrayList<>();
         if (!f) miss.add("filters");
