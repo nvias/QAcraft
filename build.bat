@@ -7,7 +7,7 @@ echo.
 where java >nul 2>nul
 if errorlevel 1 (
     echo ERROR: Java not found!
-    echo Install Java 21+ from: https://adoptium.net/
+    echo Install Java 25 or newer from: https://adoptium.net/
     echo.
     pause
     exit /b 1
@@ -25,14 +25,19 @@ if exist "%~dp0target\QAcraft.jar" (
     echo   BUILD SUCCESSFUL!
     echo ====================================
     echo.
-    echo Plugin JAR: target\QAcraft.jar
-    echo Copy it into your server's plugins\ folder.
+    echo Plugin: target\QAcraft.jar
     echo.
+    set /p COPY="Copy to QAcraft-Server\plugins\? (Y/N): "
+    if /i "%COPY%"=="Y" (
+        if not exist "%~dp0QAcraft-Server\plugins" mkdir "%~dp0QAcraft-Server\plugins"
+        copy "%~dp0target\QAcraft.jar" "%~dp0QAcraft-Server\plugins\" >nul
+        echo Copied to QAcraft-Server\plugins\!
+    )
 ) else (
     echo ====================================
     echo   BUILD FAILED
     echo ====================================
-    echo Check the errors above.
+    echo Check errors above.
 )
 echo.
 pause
