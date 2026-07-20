@@ -1,7 +1,7 @@
 name: QAcraft
 version: '1.0.0'
 main: com.qacraft.QAcraftPlugin
-api-version: '1.21'
+api-version: '26.1'
 description: BB84 Quantum Key Distribution simulation in Minecraft
 authors: [NVIAS, QAcraft]
 website: https://bridgetostem.com

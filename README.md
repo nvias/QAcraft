@@ -18,8 +18,8 @@ for workshops.
 
 ## Requirements
 
-- **Java 21** or newer — [Adoptium / Temurin](https://adoptium.net/)
-- **Paper 1.21.4+** server ([papermc.io](https://papermc.io/))
+- **Java 25** or newer — [Adoptium / Temurin](https://adoptium.net/)
+- **Paper 26.1.2+** server ([papermc.io](https://papermc.io/))
 
 ---
 

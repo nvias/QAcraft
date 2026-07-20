@@ -11,8 +11,7 @@
     <description>BB84 Quantum Key Distribution simulation in Minecraft</description>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -27,7 +26,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.4-R0.1-SNAPSHOT</version>
+            <version>26.1.2.build.74-stable</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
